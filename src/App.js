@@ -14,34 +14,61 @@ function App() {
 
   function addToCart(book) {
     const dupeItem = cart.find(item => +item.id === +book.id)
-    if (dupeItem){
+    if (dupeItem) {
       setCart(
         cart.map(item => {
-        if (item.id === dupeItem.id)
+          if (item.id === dupeItem.id)
+            return {
+              ...item,
+              quantity: item.quantity + 1
+            }
+          else
+            return item
+        }))
+    }
+    else
+      setCart([...cart, { ...book, quantity: 1 }])
+  }
+
+  function changeQuantity(book, newQuantity) {
+    setCart(
+      cart.map(item => {
+        if (item.id === book.id)
           return {
             ...item,
-            quantity: item.quantity + 1
+            quantity: +newQuantity
           }
         else
           return item
       }))
-    }
-    else
-      setCart([...cart, {...book, quantity: 1}])
+  }
+
+  function removeFromCart(book) {
+    setCart(cart.filter(item => {
+      return item.id !== book.id
+    }))
+  }
+
+  function numItemsInCart() {
+    let counter = 0;
+    cart.forEach(item => {
+      counter += item.quantity
+    })
+    return counter
   }
 
   useEffect(() => {
-    console.log(cart)
+
   }, [cart])
 
   return (
     <Router>
       <div className="App">
-        <Nav />
+        <Nav numItemsInCart={numItemsInCart()} />
         <Route path="/" exact component={Home} />
         <Route path="/books" exact render={() => <Books books={books} />} />
-        <Route path="/books/:id" render={() => <BookInfo books={books} addToCart={addToCart} />} />
-        <Route path="/cart" render={() => <Cart books={books} />} />
+        <Route path="/books/:id" render={() => <BookInfo books={books} addToCart={addToCart} cart={cart} />} />
+        <Route path="/cart" render={() => <Cart books={books} cart={cart} changeQuantity={changeQuantity} removeFromCart={removeFromCart}/>} />
         <Footer />
       </div>
     </Router>
